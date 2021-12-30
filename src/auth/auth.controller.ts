@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { User as UserModel, Prisma } from '@prisma/client';
 import { AuthService } from './auth.service';
+import { AuthDto } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -22,11 +23,25 @@ export class AuthController {
 
   @HttpCode(200)
   @Post('login')
-  async login(@Body() userData: UserModel) {
-    const user = await this.authService.validateUser(
-      userData.email,
-      userData.password,
-    );
+  async login(@Body() dto: AuthDto) {
+    const user = await this.authService.validateUser(dto);
     return this.authService.login(user.email);
   }
+
+  // @Post('logout')
+  // @HttpCode(HttpStatus.OK)
+  // logout(@GetCurrentUserId() userId: number) {
+  //   return this.authService.logout(userId);
+  // }
+
+  // @Public()
+  // @UseGuards(RtGuard)
+  // @Post('refresh')
+  // @HttpCode(HttpStatus.OK)
+  // refreshTokens(
+  //   @GetCurrentUserId() userId: number,
+  //   @GetCurrentUser('refreshToken') refreshToken: string,
+  // ) {
+  //   return this.authService.refreshTokens(userId, refreshToken);
+  // }
 }

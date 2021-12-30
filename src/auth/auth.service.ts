@@ -6,7 +6,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { User as UserModel, Prisma } from '@prisma/client';
 import { compare, genSalt, hash } from 'bcryptjs';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { AuthDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -28,12 +29,12 @@ export class AuthService {
       where: { email },
     });
   }
-  async validateUser(email: string, password: string): Promise<UserModel> {
-    const user = await this.findUser(email);
+  async validateUser(dto: AuthDto): Promise<UserModel> {
+    const user = await this.findUser(dto.email);
     if (!user) {
       throw new UnauthorizedException('user not found');
     }
-    const isPasswordCorrect = await compare(password, user.password);
+    const isPasswordCorrect = await compare(dto.password, user.password);
     if (!isPasswordCorrect) {
       throw new UnauthorizedException('wrong password');
     }
