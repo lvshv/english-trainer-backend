@@ -4,44 +4,54 @@ import {
   Post,
   BadRequestException,
   HttpCode,
+  HttpStatus,
+  UseGuards,
+  Res,
 } from '@nestjs/common';
-import { User as UserModel, Prisma } from '@prisma/client';
+import { Response } from 'express';
+
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
+import { UserService } from '../user/user.service';
+import { AuthGuard } from '@nestjs/passport';
+import { GetCurrentUser, GetCurrentUserId } from 'src/common/decorators';
+import { AtGuard, RtGuard } from './guards';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
+
   @Post('register')
-  async register(@Body() userData: UserModel): Promise<UserModel> {
+  @HttpCode(HttpStatus.CREATED)
+  async register(@Body() userData: any): Promise<any> {
     const oldUser = await this.authService.findUser(userData.email);
     if (oldUser) {
-      throw new BadRequestException('user already exist');
+      throw new BadRequestException('user has already exist');
     }
-    return this.authService.createUser(userData);
+    return this.authService.registerUser(userData);
   }
 
-  @HttpCode(200)
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   async login(@Body() dto: AuthDto) {
-    const user = await this.authService.validateUser(dto);
-    return this.authService.login(user.email);
+    return this.authService.login(dto.email, dto.password);
   }
 
-  // @Post('logout')
-  // @HttpCode(HttpStatus.OK)
-  // logout(@GetCurrentUserId() userId: number) {
-  //   return this.authService.logout(userId);
-  // }
+  @UseGuards(AtGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@GetCurrentUserId() userId: number, @Res() res: Response) {
+    await this.authService.logout(userId);
+    return res.json({ status: 'success' });
+  }
 
-  // @Public()
-  // @UseGuards(RtGuard)
-  // @Post('refresh')
-  // @HttpCode(HttpStatus.OK)
-  // refreshTokens(
-  //   @GetCurrentUserId() userId: number,
-  //   @GetCurrentUser('refreshToken') refreshToken: string,
-  // ) {
-  //   return this.authService.refreshTokens(userId, refreshToken);
-  // }
+  @UseGuards(RtGuard)
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  refreshTokens(
+    @GetCurrentUserId() userId: number,
+    @GetCurrentUser('refreshToken') refreshToken: string,
+  ) {
+    return this.authService.refreshTokens(userId, refreshToken);
+  }
 }

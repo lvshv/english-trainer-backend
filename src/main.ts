@@ -2,13 +2,10 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { PrismaService } from './prisma.service';
 
 async function bootstrap() {
   const PORT = process.env.PORT || 5000;
   const app = await NestFactory.create(AppModule);
-  // const prismaService: PrismaService = app.get(PrismaService);
-  // prismaService.enableShutdownHooks(app);
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api');
   const config = new DocumentBuilder()
