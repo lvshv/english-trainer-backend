@@ -18,6 +18,18 @@ services:
   #   depends_on:
   #     - postgres
   #   restart: always
+
+  # reverse-proxy:
+  #   image: nginx:1.17.10
+  #   container_name: reverse_proxy_demo
+  #   # depends_on:
+  #   #     - weather-report
+  #   #     - temperature-service
+  #   #     - precip-service
+  #   volumes:
+  #     - ./reverse_proxy/nginx.conf:/etc/nginx/nginx.conf
+  #   ports:
+  #     - 80:80
   postgres:
     container_name: postgres
     image: postgres:12

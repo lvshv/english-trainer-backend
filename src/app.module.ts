@@ -4,6 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './user/entities/user.entity';
+import { TranslateModule } from './translate/translate.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UserEntity } from './user/entities/user.entity';
     ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
     UserModule,
+    TranslateModule,
   ],
 })
 export class AppModule {}
