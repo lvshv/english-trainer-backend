@@ -1,12 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Query, Controller, HttpCode, HttpStatus, Get } from '@nestjs/common';
 import { TranslateService } from './translate.service';
 
 @Controller()
 export class TranslateController {
   constructor(private translateService: TranslateService) {}
-  @Post('translate')
+  @Get('translate')
   @HttpCode(HttpStatus.OK)
-  async translate(@Body() dto: any) {
-    return this.translateService.translate(dto);
+  async translate(@Query() query: any) {
+    return this.translateService.translate(query);
   }
 }

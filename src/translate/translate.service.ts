@@ -5,13 +5,18 @@ import { map } from 'rxjs/operators';
 @Injectable()
 export class TranslateService {
   constructor(private httpService: HttpService) {}
-  async translate(dto) {
-    console.log('🚀 ~ translate ~ dto', dto);
-    const res = await this.httpService
+  async translate(query) {
+    const res = this.httpService
       .get(
-        `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input&sl=auto&tl=ru&q=${dto.data} `,
+        encodeURI(
+          `https://translate.googleapis.com/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input&sl=auto&tl=en&q=${query.word}`,
+        ),
       )
-      .toPromise();
-    return res.data;
+      .pipe(
+        map((axiosResponse) => {
+          return axiosResponse.data;
+        }),
+      );
+    return res;
   }
 }
