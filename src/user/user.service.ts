@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-// import { PrismaService } from 'src/prisma/prisma.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 import { Repository } from 'typeorm';

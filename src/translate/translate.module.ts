@@ -7,5 +7,6 @@ import { HttpModule } from '@nestjs/axios';
   imports: [HttpModule],
   controllers: [TranslateController],
   providers: [TranslateService],
+  exports: [TranslateService],
 })
 export class TranslateModule {}

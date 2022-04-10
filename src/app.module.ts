@@ -5,6 +5,10 @@ import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './user/entities/user.entity';
 import { TranslateModule } from './translate/translate.module';
+import { CategoriesModule } from './category/category.module';
+import { CategoryEntity } from './category/entities/category.entity';
+import { ExerciseModule } from './exercise/exercise.module';
+import { ExerciseEntity } from './exercise/entities/exercise.entity';
 
 @Module({
   imports: [
@@ -17,6 +21,8 @@ import { TranslateModule } from './translate/translate.module';
       database: 'shop',
       entities: [
         UserEntity,
+        CategoryEntity,
+        ExerciseEntity,
         // PostEntity,
         // CommentEntity
       ],
@@ -26,6 +32,8 @@ import { TranslateModule } from './translate/translate.module';
     AuthModule,
     UserModule,
     TranslateModule,
+    CategoriesModule,
+    ExerciseModule,
   ],
 })
 export class AppModule {}
