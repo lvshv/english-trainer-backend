@@ -4,13 +4,10 @@ import { TranslateService } from 'src/translate/translate.service';
 
 @Controller('categories')
 export class CategoriesController {
-  constructor(
-    private readonly categoriesService: CategoriesService,
-    private readonly translateService: TranslateService,
-  ) {}
+  constructor(private readonly categoriesService: CategoriesService) {}
   @Get('translate')
   @HttpCode(HttpStatus.OK)
-  async translate(@Query() query: any) {
-    return this.translateService.translate(query);
+  async create(@Query() dto: any) {
+    return this.categoriesService.create(dto);
   }
 }

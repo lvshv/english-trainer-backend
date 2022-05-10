@@ -16,15 +16,20 @@ import { UserService } from '../user/user.service';
 import { AuthGuard } from '@nestjs/passport';
 import { GetCurrentUser, GetCurrentUserId } from 'src/common/decorators';
 import { AtGuard, RtGuard } from './guards';
+import { UserEntity } from 'src/user/entities/user.entity';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private userService: UserService,
+  ) {}
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() userData: any): Promise<any> {
-    const oldUser = await this.authService.findUser(userData.email);
+  async register(@Body() userData: CreateUserDto): Promise<UserEntity> {
+    const oldUser = await this.userService.findUser(userData.email);
     if (oldUser) {
       throw new BadRequestException('user has already exist');
     }

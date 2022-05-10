@@ -7,9 +7,6 @@ export class CreateUserDto {
   fullName: string;
 
   @IsEmail(undefined, { message: 'Неверная почта' })
-  // @UniqueOnDatabase(UserEntity, {
-  //   message: 'Такая почта уже есть',
-  // })
   email: string;
 
   @Length(6, 32, { message: 'Пароль должен минимум 6 символов' })

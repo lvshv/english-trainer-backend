@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { genSalt, hash } from 'bcryptjs';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UserService {
@@ -10,13 +11,16 @@ export class UserService {
     @InjectRepository(UserEntity)
     private repository: Repository<UserEntity>,
   ) {}
-  findUser(email: string) {
-    return this.repository.findOne({ email });
+
+  findUser(email: string, options: FindOneOptions = {}): Promise<UserEntity> {
+    return this.repository.findOne({ email }, options);
   }
-  findAllUsers() {
+
+  findAllUsers(): Promise<UserEntity[]> {
     return this.repository.find({});
   }
-  findUserById(id: number) {
+
+  findUserById(id: number): Promise<UserEntity> {
     return this.repository.findOne({
       id,
     });
@@ -24,13 +28,9 @@ export class UserService {
   updateUser(id: number, dto: any) {
     return this.repository.update(id, dto);
   }
-  async createUser(dto): Promise<any> {
+
+  async createUser(dto: CreateUserDto): Promise<UserEntity> {
     const user = await this.repository.create(dto);
     return await this.repository.save(user);
   }
-  // async findUser(email: string): Promise<UserModel> {
-  //   return this.prisma.user.findUnique({
-  //     where: { email },
-  //   });
-  // }
 }

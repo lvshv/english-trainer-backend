@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-
 import { compare, genSalt, hash } from 'bcryptjs';
 import { UserService } from 'src/user/user.service';
-
-import { AuthDto } from './dto/auth.dto';
+import { IUser } from 'src/user/entities/user.interface';
+import { UserEntity } from 'src/user/entities/user.entity';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -20,15 +20,17 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async login(email: string, password: string): Promise<any> {
+  async login(email: string, password: string): Promise<UserEntity> {
     const user = await this.validateUser(email, password);
+
     const tokens = await this.getTokens(user.id, user.email);
     await this.updateRtHash(user.id, tokens.refresh_token);
     return { ...user, ...tokens };
   }
 
-  async registerUser(user: any): Promise<any> {
+  async registerUser(user: CreateUserDto): Promise<UserEntity> {
     const { email, fullName, password } = user;
+
     const salt = await genSalt(10);
     const passwordHash = await hash(password, salt);
     const createdUser = await this.userService.createUser({
@@ -41,7 +43,7 @@ export class AuthService {
     return { ...createdUser, ...tokens };
   }
 
-  async logout(userId: number) {
+  async logout(userId: number): Promise<void> {
     await this.userService.updateUser(userId, { hashRt: null });
   }
 
@@ -57,19 +59,20 @@ export class AuthService {
     return tokens;
   }
 
-  async findUser(email: string): Promise<any> {
-    return this.userService.findUser(email);
-  }
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.findUser(email);
+    const user = await this.userService.findUser(email, {
+      select: ['id', 'email', 'password'],
+    });
 
     if (!user) {
       throw new UnauthorizedException(`user with email: ${email} not found`);
     }
+
     const isCorrectPassword = await compare(password, user.password);
     if (!isCorrectPassword) {
       throw new UnauthorizedException('wrong password');
     }
+    delete user.password;
     return user;
   }
 

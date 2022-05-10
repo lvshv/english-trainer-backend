@@ -9,31 +9,27 @@ import { CategoriesModule } from './category/category.module';
 import { CategoryEntity } from './category/entities/category.entity';
 import { ExerciseModule } from './exercise/exercise.module';
 import { ExerciseEntity } from './exercise/entities/exercise.entity';
+import { ArticleModule } from './article/article.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
       port: 5432,
       username: 'postgres',
       password: 'root',
-      database: 'shop',
-      entities: [
-        UserEntity,
-        CategoryEntity,
-        ExerciseEntity,
-        // PostEntity,
-        // CommentEntity
-      ],
+      database: 'english',
+      entities: [UserEntity, CategoryEntity, ExerciseEntity],
       synchronize: true,
     }),
-    ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
     UserModule,
     TranslateModule,
     CategoriesModule,
     ExerciseModule,
+    ArticleModule,
   ],
 })
 export class AppModule {}
