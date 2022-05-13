@@ -5,7 +5,7 @@ import { map } from 'rxjs/operators';
 @Injectable()
 export class TranslateService {
   constructor(private httpService: HttpService) {}
-  async translate(query) {
+  async translate(query: { word: string }) {
     const res = this.httpService
       .get(
         encodeURI(

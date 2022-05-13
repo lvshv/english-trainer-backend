@@ -13,17 +13,18 @@ import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto/auth.dto';
 import { UserService } from '../user/user.service';
-import { AuthGuard } from '@nestjs/passport';
 import { GetCurrentUser, GetCurrentUserId } from 'src/common/decorators';
 import { AtGuard, RtGuard } from './guards';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
     private userService: UserService,
+    private config: ConfigService,
   ) {}
 
   @Post('register')
@@ -38,8 +39,22 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: AuthDto) {
-    return this.authService.login(dto.email, dto.password);
+  async login(
+    @Body() dto: AuthDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const frontendDomain = this.config.get<string>('FRONTEND_DOMAIN');
+    const userData = await this.authService.login(dto.email, dto.password);
+    const tokens = {
+      access_token: userData.access_token,
+      refresh_token: userData.refresh_token,
+    };
+    response.cookie('auth-cookie', tokens, {
+      httpOnly: true,
+      domain: 'localhost',
+    });
+
+    return userData;
   }
 
   @UseGuards(AtGuard)
@@ -53,10 +68,16 @@ export class AuthController {
   @UseGuards(RtGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  refreshTokens(
+  async refreshTokens(
     @GetCurrentUserId() userId: number,
     @GetCurrentUser('refreshToken') refreshToken: string,
+    @Res({ passthrough: true }) response: Response,
   ) {
-    return this.authService.refreshTokens(userId, refreshToken);
+    const tokens = await this.authService.refreshTokens(userId, refreshToken);
+    response.cookie('auth-cookie', tokens, {
+      httpOnly: true,
+      domain: 'localhost',
+    });
+    return tokens;
   }
 }

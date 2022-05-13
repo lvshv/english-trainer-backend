@@ -10,6 +10,7 @@ import {
   Request,
   Query,
 } from '@nestjs/common';
+import { AtGuard } from 'src/auth/guards';
 import { UserService } from './user.service';
 
 @Controller('users')
@@ -21,8 +22,9 @@ export class UserController {
     return this.userService.findAllUsers();
   }
 
+  @UseGuards(AtGuard)
   @Get('me')
   getProfile(@Request() req) {
-    return this.userService.findUserById(req.user.id);
+    return this.userService.findUserById(req.user.sub);
   }
 }

@@ -11,6 +11,7 @@ import { UserService } from 'src/user/user.service';
 import { IUser } from 'src/user/entities/user.interface';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { Tokens } from './types/tokens.type';
 
 @Injectable()
 export class AuthService {
@@ -20,11 +21,12 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  async login(email: string, password: string): Promise<UserEntity> {
+  async login(email: string, password: string): Promise<UserEntity & Tokens> {
     const user = await this.validateUser(email, password);
 
     const tokens = await this.getTokens(user.id, user.email);
     await this.updateRtHash(user.id, tokens.refresh_token);
+
     return { ...user, ...tokens };
   }
 
@@ -51,7 +53,9 @@ export class AuthService {
     const user = await this.userService.findUserById(userId);
     if (!user || !user.hashRt) throw new ForbiddenException('Access Denied');
 
-    const isRtMatches = await compare(rt, user.hashRt);
+    // const isRtMatches = await compare(rt, user.hashRt);
+    const isRtMatches = rt === user.hashRt;
+
     if (!isRtMatches) throw new ForbiddenException('Access Denied');
 
     const tokens = await this.getTokens(user.id, user.email);
@@ -61,7 +65,7 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userService.findUser(email, {
-      select: ['id', 'email', 'password'],
+      select: ['id', 'email', 'password', 'fullName', 'role'],
     });
 
     if (!user) {
@@ -81,12 +85,12 @@ export class AuthService {
   }
 
   async updateRtHash(userId: number, rt: string) {
-    const hashRt = await this.hashData(rt);
-    await this.userService.updateUser(userId, { hashRt });
+    // const hashRt = await this.hashData(rt);
+    await this.userService.updateUser(userId, { hashRt: rt });
   }
 
-  async getTokens(userId: number, email: string): Promise<any> {
-    const [at, rt] = await Promise.all([
+  async getTokens(userId: number, email: string): Promise<Tokens> {
+    const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(
         {
           sub: userId,
@@ -110,8 +114,8 @@ export class AuthService {
     ]);
 
     return {
-      access_token: at,
-      refresh_token: rt,
+      access_token,
+      refresh_token,
     };
   }
 }
