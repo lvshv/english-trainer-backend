@@ -1,13 +1,13 @@
-FROM node:12.13-alpine
-
+FROM node:14-alpine as build
 WORKDIR /app
-
-COPY package*.json ./
-
+ADD *.json .
 RUN npm install
+ADD . .
+RUN npm run build
 
-COPY . .
-
-COPY ./dist ./dist
-
-CMD ["npm", "run", "start:dev"]
+FROM node:14-alpine
+WORKDIR /app
+ADD package.json ./
+RUN npm install --only=prod
+COPY --from=build /app/dist ./dist
+CMD ["node", "./dist/main.js"]

@@ -16,7 +16,7 @@ import { ArticleModule } from './article/article.module';
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
+      host: process.env.NODE_ENV === 'development' ? 'localhost' : 'postgres',
       port: 5432,
       username: 'postgres',
       password: 'root',
