@@ -51,7 +51,8 @@ export class AuthController {
     };
     response.cookie('auth-cookie', tokens, {
       httpOnly: true,
-      domain: 'localhost',
+      domain:
+        process.env.NODE_ENV === 'development' ? 'localhost' : frontendDomain,
     });
 
     return userData;
@@ -73,10 +74,12 @@ export class AuthController {
     @GetCurrentUser('refreshToken') refreshToken: string,
     @Res({ passthrough: true }) response: Response,
   ) {
+    const frontendDomain = this.config.get<string>('FRONTEND_DOMAIN');
     const tokens = await this.authService.refreshTokens(userId, refreshToken);
     response.cookie('auth-cookie', tokens, {
       httpOnly: true,
-      domain: 'localhost',
+      domain:
+        process.env.NODE_ENV === 'development' ? 'localhost' : frontendDomain,
     });
     return tokens;
   }
