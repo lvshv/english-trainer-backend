@@ -5,7 +5,7 @@ services:
     container_name: nest
     build:
       context: .
-      dockerfile: ./backend
+      dockerfile: ./backend/Dockerfile
     env_file:
       - ./backend/.env
     ports:

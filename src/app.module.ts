@@ -1,28 +1,33 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from './user/entities/user.entity';
-import { TranslateModule } from './translate/translate.module';
-import { CategoriesModule } from './category/category.module';
-import { CategoryEntity } from './category/entities/category.entity';
-import { ExerciseModule } from './exercise/exercise.module';
-import { ExerciseEntity } from './exercise/entities/exercise.entity';
-import { ArticleModule } from './article/article.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthModule } from 'src/auth/auth.module';
+import { UserModule } from 'src/user/user.module';
+import { TranslateModule } from 'src/translate/translate.module';
+import { CategoriesModule } from 'src/category/category.module';
+import { ExerciseModule } from 'src/exercise/exercise.module';
+import { ArticleModule } from 'src/article/article.module';
+import { UserEntity } from 'src/user/entities/user.entity';
+import { CategoryEntity } from 'src/category/entities/category.entity';
+import { ExerciseEntity } from 'src/exercise/entities/exercise.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.NODE_ENV === 'development' ? 'localhost' : 'postgres',
-      port: 5432,
-      username: 'postgres',
-      password: 'root',
-      database: 'english',
-      entities: [UserEntity, CategoryEntity, ExerciseEntity],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('DATABASE_HOST'),
+        port: parseInt(configService.get<string>('DATABASE_PORT')),
+        username: configService.get<string>('DATABASE_USER'),
+        password: configService.get<string>('DATABASE_PASS'),
+        database: configService.get<string>('DATABASE_NAME'),
+        entities: [UserEntity, CategoryEntity, ExerciseEntity],
+        // entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: true,
+      }),
     }),
     AuthModule,
     UserModule,

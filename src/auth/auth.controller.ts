@@ -21,11 +21,14 @@ import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
+  private frontendDomain: string;
   constructor(
     private authService: AuthService,
     private userService: UserService,
     private config: ConfigService,
-  ) {}
+  ) {
+    this.frontendDomain = this.config.get<string>('FRONTEND_DOMAIN');
+  }
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
@@ -43,7 +46,6 @@ export class AuthController {
     @Body() dto: AuthDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const frontendDomain = this.config.get<string>('FRONTEND_DOMAIN');
     const userData = await this.authService.login(dto.email, dto.password);
     const tokens = {
       access_token: userData.access_token,
@@ -51,8 +53,7 @@ export class AuthController {
     };
     response.cookie('auth-cookie', tokens, {
       httpOnly: true,
-      domain:
-        process.env.NODE_ENV === 'development' ? 'localhost' : frontendDomain,
+      domain: this.frontendDomain,
     });
 
     return userData;
@@ -74,12 +75,10 @@ export class AuthController {
     @GetCurrentUser('refreshToken') refreshToken: string,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const frontendDomain = this.config.get<string>('FRONTEND_DOMAIN');
     const tokens = await this.authService.refreshTokens(userId, refreshToken);
     response.cookie('auth-cookie', tokens, {
       httpOnly: true,
-      domain:
-        process.env.NODE_ENV === 'development' ? 'localhost' : frontendDomain,
+      domain: this.frontendDomain,
     });
     return tokens;
   }
